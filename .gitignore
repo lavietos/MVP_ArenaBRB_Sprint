@@ -111,3 +111,6 @@ api-keys.txt
 
 # Bun
 bun.lockb
+
+# pnpm
+pnpm*

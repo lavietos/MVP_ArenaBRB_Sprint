@@ -520,7 +520,7 @@ const ConsumerFood = () => {
       {/* Shopping Cart Overlay */}
       {showCart && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center md:justify-center animate-fade-in">
-          <div className="bg-card w-full md:max-w-2xl md:rounded-t-3xl rounded-t-3xl max-h-[90vh] overflow-hidden flex flex-col animate-slide-up">
+          <div className="bg-card w-full md:max-w-2xl md:rounded-3xl rounded-t-3xl max-h-[90vh] overflow-hidden flex flex-col animate-slide-up">
             <div className="p-6 border-b border-border flex items-center justify-between">
               <h2 className="text-2xl font-bold text-foreground">Carrinho</h2>
               <Button variant="ghost" size="icon" onClick={() => setShowCart(false)}>
