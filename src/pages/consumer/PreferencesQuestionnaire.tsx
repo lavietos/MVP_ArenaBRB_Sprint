@@ -6,17 +6,18 @@ interface PreferencesQuestionnaireProps {
   onComplete: () => void;
 }
 
+// Export preferences for prefetching
+export const preferences = [
+  { id: "shows", label: "Shows (Pop, Rock, etc.)", emoji: "🎵" },
+  { id: "football", label: "Jogos de Futebol", emoji: "⚽" },
+  { id: "concerts", label: "Concertos Clássicos", emoji: "🎻" },
+  { id: "festivals", label: "Festivais", emoji: "🎪" },
+  { id: "sports", label: "Eventos Esportivos", emoji: "🏟️" },
+  { id: "cultural", label: "Eventos Culturais", emoji: "🎭" },
+];
+
 const PreferencesQuestionnaire = ({ onComplete }: PreferencesQuestionnaireProps) => {
   const [selectedPreferences, setSelectedPreferences] = useState<string[]>([]);
-
-  const preferences = [
-    { id: "shows", label: "Shows (Pop, Rock, etc.)", emoji: "🎵" },
-    { id: "football", label: "Jogos de Futebol", emoji: "⚽" },
-    { id: "concerts", label: "Concertos Clássicos", emoji: "🎻" },
-    { id: "festivals", label: "Festivais", emoji: "🎪" },
-    { id: "sports", label: "Eventos Esportivos", emoji: "🏟️" },
-    { id: "cultural", label: "Eventos Culturais", emoji: "🎭" },
-  ];
 
   const togglePreference = (id: string) => {
     setSelectedPreferences((prev) =>
@@ -31,9 +32,9 @@ const PreferencesQuestionnaire = ({ onComplete }: PreferencesQuestionnaireProps)
   };
 
   return (
-    <div className="min-h-screen gradient-subtle p-6 animate-fade-in">
-      <div className="max-w-2xl mx-auto space-y-8 py-8">
-        <div className="text-center space-y-4 animate-scale-in">
+    <div className="min-h-screen gradient-subtle p-6">
+      <div className="max-w-2xl mx-auto space-y-8 py-8 animate-fade-in">
+        <div className="text-center space-y-4">
           <h1 className="text-4xl font-bold text-foreground">
             Quais eventos você gosta?
           </h1>
@@ -43,12 +44,11 @@ const PreferencesQuestionnaire = ({ onComplete }: PreferencesQuestionnaireProps)
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {preferences.map((pref, index) => (
+          {preferences.map((pref) => (
             <button
               key={pref.id}
               onClick={() => togglePreference(pref.id)}
-              style={{ animationDelay: `${index * 0.1}s` }}
-              className={`relative p-6 rounded-2xl border-2 transition-smooth hover-lift animate-fade-in ${
+              className={`relative p-6 rounded-2xl border-2 transition-smooth hover-lift ${
                 selectedPreferences.includes(pref.id)
                   ? "border-primary bg-gradient-primary/10 shadow-glow"
                   : "border-border bg-card hover:border-primary/50"
