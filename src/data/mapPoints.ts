@@ -17,8 +17,8 @@ export const MAP_POINTS: MapPoint[] = [
     title: "Ginásio Nilson Nelson",
     description: "Ginásio para eventos esportivos e atividades",
     position: {
-      lat: -15.784,
-      lng: -47.9005,
+      lat: -15.78314,
+      lng: -47.903154,
     },
     type: "venue",
     icon: "🏀",

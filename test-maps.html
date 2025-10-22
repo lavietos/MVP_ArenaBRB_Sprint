@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Teste Google Maps - Arena BRB</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: Arial, sans-serif;
+                background: #f5f5f5;
+            }
+
+            .container {
+                max-width: 1200px;
+                margin: 0 auto;
+                padding: 20px;
+            }
+
+            .header {
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            h1 {
+                color: #333;
+                margin-bottom: 10px;
+            }
+
+            .info {
+                background: #fff3cd;
+                border: 1px solid #ffc107;
+                padding: 15px;
+                border-radius: 5px;
+                margin-bottom: 20px;
+            }
+
+            .info p {
+                margin-bottom: 5px;
+                font-size: 14px;
+            }
+
+            .status {
+                background: white;
+                padding: 15px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .status-item {
+                display: flex;
+                align-items: center;
+                margin-bottom: 10px;
+                padding: 10px;
+                background: #f8f9fa;
+                border-radius: 5px;
+            }
+
+            .status-icon {
+                font-size: 24px;
+                margin-right: 10px;
+            }
+
+            .success {
+                background: #d4edda;
+                border-left: 4px solid #28a745;
+            }
+
+            .error {
+                background: #f8d7da;
+                border-left: 4px solid #dc3545;
+            }
+
+            .pending {
+                background: #fff3cd;
+                border-left: 4px solid #ffc107;
+            }
+
+            #map {
+                width: 100%;
+                height: 500px;
+                border-radius: 10px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .console-output {
+                background: #1e1e1e;
+                color: #d4d4d4;
+                padding: 20px;
+                border-radius: 10px;
+                margin-top: 20px;
+                font-family: "Courier New", monospace;
+                font-size: 12px;
+                max-height: 300px;
+                overflow-y: auto;
+            }
+
+            .console-output .log {
+                margin-bottom: 5px;
+            }
+
+            .console-output .log.error {
+                color: #f48771;
+            }
+
+            .console-output .log.success {
+                color: #4ec9b0;
+            }
+
+            .console-output .log.info {
+                color: #569cd6;
+            }
+
+            .instructions {
+                background: white;
+                padding: 20px;
+                border-radius: 10px;
+                margin-top: 20px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+
+            .instructions h3 {
+                color: #333;
+                margin-bottom: 15px;
+            }
+
+            .instructions ol {
+                margin-left: 20px;
+            }
+
+            .instructions li {
+                margin-bottom: 10px;
+                line-height: 1.6;
+            }
+
+            .instructions a {
+                color: #007bff;
+                text-decoration: none;
+            }
+
+            .instructions a:hover {
+                text-decoration: underline;
+            }
+
+            code {
+                background: #f4f4f4;
+                padding: 2px 6px;
+                border-radius: 3px;
+                font-family: "Courier New", monospace;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🗺️ Teste do Google Maps - Arena BRB</h1>
+                <p>
+                    Esta página testa se a configuração do Google Maps está
+                    correta
+                </p>
+            </div>
+
+            <div class="info">
+                <p>
+                    <strong>⚠️ Atenção:</strong> Esta é uma página de teste.
+                    Use-a para verificar se a API do Google Maps está
+                    configurada corretamente.
+                </p>
+                <p>
+                    <strong>🔑 API Key:</strong>
+                    <span id="api-key-display">Carregando...</span>
+                </p>
+            </div>
+
+            <div class="status">
+                <h3>Status da Configuração</h3>
+                <div id="status-container"></div>
+            </div>
+
+            <div id="map"></div>
+
+            <div class="console-output" id="console-output">
+                <div class="log info">
+                    📋 Console de Debug (os logs aparecerão aqui)
+                </div>
+            </div>
+
+            <div class="instructions">
+                <h3>❌ Se o mapa não carregar, siga estes passos:</h3>
+                <ol>
+                    <li>
+                        <strong>Habilite a Maps JavaScript API:</strong><br />
+                        <a
+                            href="https://console.cloud.google.com/apis/library/maps-backend.googleapis.com"
+                            target="_blank"
+                        >
+                            https://console.cloud.google.com/apis/library/maps-backend.googleapis.com
+                        </a>
+                    </li>
+                    <li>
+                        <strong>Habilite a Places API:</strong><br />
+                        <a
+                            href="https://console.cloud.google.com/apis/library/places-backend.googleapis.com"
+                            target="_blank"
+                        >
+                            https://console.cloud.google.com/apis/library/places-backend.googleapis.com
+                        </a>
+                    </li>
+                    <li>
+                        <strong>Verifique o arquivo .env:</strong><br />
+                        Certifique-se de que existe o arquivo
+                        <code>.env</code> na raiz do projeto com:<br />
+                        <code
+                            >VITE_GOOGLE_MAPS_API_KEY="AIzaSyAhg1nMd8JJhhhDnm4pTM0waCGEk_p-WbA"</code
+                        >
+                    </li>
+                    <li>
+                        <strong>Reinicie o servidor:</strong><br />
+                        Execute <code>npm run dev</code> novamente após alterar
+                        o .env
+                    </li>
+                    <li>
+                        <strong>Configure as restrições (se necessário):</strong
+                        ><br />
+                        No Google Cloud Console, vá em APIs & Services >
+                        Credentials > sua API Key<br />
+                        Em "Application restrictions", adicione
+                        <code>localhost:*</code> nos HTTP referrers
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <script>
+            // Substituir pela sua API Key
+            const API_KEY = "AIzaSyBe1uLh22Gq8ztWoM7pa92Wge5dsEeIWwc";
+
+            // Logger customizado
+            const logs = [];
+            function logToConsole(message, type = "info") {
+                const timestamp = new Date().toLocaleTimeString();
+                const logElement = document.getElementById("console-output");
+                const logDiv = document.createElement("div");
+                logDiv.className = `log ${type}`;
+                logDiv.textContent = `[${timestamp}] ${message}`;
+                logElement.appendChild(logDiv);
+                logElement.scrollTop = logElement.scrollHeight;
+
+                console.log(message);
+            }
+
+            // Atualizar status
+            function updateStatus(id, status, message) {
+                const container = document.getElementById("status-container");
+                let statusDiv = document.getElementById(`status-${id}`);
+
+                if (!statusDiv) {
+                    statusDiv = document.createElement("div");
+                    statusDiv.id = `status-${id}`;
+                    statusDiv.className = "status-item pending";
+                    container.appendChild(statusDiv);
+                }
+
+                statusDiv.className = `status-item ${status}`;
+
+                let icon = "⏳";
+                if (status === "success") icon = "✅";
+                if (status === "error") icon = "❌";
+
+                statusDiv.innerHTML = `<span class="status-icon">${icon}</span><span>${message}</span>`;
+            }
+
+            // Exibir API Key mascarada
+            document.getElementById("api-key-display").textContent = API_KEY
+                ? `${API_KEY.substring(0, 10)}...${API_KEY.substring(API_KEY.length - 4)}`
+                : "NÃO CONFIGURADA";
+
+            // Função de erro global
+            window.gm_authFailure = function () {
+                logToConsole("❌ ERRO DE AUTENTICAÇÃO DO GOOGLE MAPS", "error");
+                updateStatus(
+                    "auth",
+                    "error",
+                    "Erro de autenticação - Verifique a API Key ou as restrições",
+                );
+
+                logToConsole("Possíveis causas:", "error");
+                logToConsole("1. API Key inválida", "error");
+                logToConsole("2. Maps JavaScript API não habilitada", "error");
+                logToConsole(
+                    "3. Restrições de domínio bloqueando localhost",
+                    "error",
+                );
+                logToConsole(
+                    "4. Problema com billing no Google Cloud",
+                    "error",
+                );
+            };
+
+            // Carregar Google Maps
+            function loadGoogleMaps() {
+                logToConsole(
+                    "🚀 Iniciando carregamento do Google Maps...",
+                    "info",
+                );
+                updateStatus(
+                    "loading",
+                    "pending",
+                    "Carregando script do Google Maps...",
+                );
+
+                const script = document.createElement("script");
+                script.src = `https://maps.googleapis.com/maps/api/js?key=${API_KEY}&libraries=places&language=pt-BR&region=BR&callback=initMap`;
+                script.async = true;
+                script.defer = true;
+
+                script.onerror = function () {
+                    logToConsole(
+                        "❌ Erro ao carregar o script do Google Maps",
+                        "error",
+                    );
+                    updateStatus(
+                        "loading",
+                        "error",
+                        "Falha ao carregar script - Verifique sua conexão",
+                    );
+                };
+
+                document.head.appendChild(script);
+            }
+
+            // Inicializar mapa
+            function initMap() {
+                try {
+                    logToConsole(
+                        "✅ Script do Google Maps carregado com sucesso",
+                        "success",
+                    );
+                    updateStatus(
+                        "loading",
+                        "success",
+                        "Script carregado com sucesso",
+                    );
+                    updateStatus("init", "pending", "Inicializando mapa...");
+
+                    const mapElement = document.getElementById("map");
+
+                    if (!mapElement) {
+                        throw new Error("Elemento do mapa não encontrado");
+                    }
+
+                    // Coordenadas da Arena BRB
+                    const arenaBRB = { lat: -15.783611, lng: -47.899167 };
+
+                    const map = new google.maps.Map(mapElement, {
+                        center: arenaBRB,
+                        zoom: 16,
+                        mapTypeId: google.maps.MapTypeId.ROADMAP,
+                    });
+
+                    logToConsole("✅ Mapa criado com sucesso", "success");
+                    updateStatus(
+                        "init",
+                        "success",
+                        "Mapa inicializado com sucesso",
+                    );
+                    updateStatus(
+                        "markers",
+                        "pending",
+                        "Adicionando marcadores...",
+                    );
+
+                    // Adicionar marcadores
+                    const locations = [
+                        {
+                            position: { lat: -15.783611, lng: -47.899167 },
+                            title: "Arena BRB Mané Garrincha",
+                            icon: "🏟️",
+                        },
+                        {
+                            position: { lat: -15.78314, lng: -47.903154 },
+                            title: "Ginásio Nilson Nelson",
+                            icon: "🏀",
+                        },
+                        {
+                            position: { lat: -15.7845, lng: -47.901 },
+                            title: "Estacionamento Nilson Nelson",
+                            icon: "🅿️",
+                        },
+                    ];
+
+                    locations.forEach((location) => {
+                        const marker = new google.maps.Marker({
+                            position: location.position,
+                            map: map,
+                            title: location.title,
+                            icon: {
+                                url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(`
+                                <svg width="50" height="50" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="25" cy="25" r="22" fill="#3b82f6" stroke="#ffffff" stroke-width="3"/>
+                                    <text x="25" y="32" text-anchor="middle" fill="white" font-size="20" font-family="Arial">${location.icon}</text>
+                                </svg>
+                            `)}`,
+                                scaledSize: new google.maps.Size(50, 50),
+                                anchor: new google.maps.Point(25, 25),
+                            },
+                        });
+
+                        const infoWindow = new google.maps.InfoWindow({
+                            content: `
+                            <div style="padding: 15px; font-family: Arial, sans-serif;">
+                                <h3 style="margin: 0 0 10px 0; font-size: 16px;">${location.icon} ${location.title}</h3>
+                                <p style="margin: 0; color: #666; font-size: 14px;">Lat: ${location.position.lat}, Lng: ${location.position.lng}</p>
+                            </div>
+                        `,
+                        });
+
+                        marker.addListener("click", () => {
+                            infoWindow.open(map, marker);
+                        });
+
+                        logToConsole(
+                            `✅ Marcador adicionado: ${location.title}`,
+                            "success",
+                        );
+                    });
+
+                    updateStatus(
+                        "markers",
+                        "success",
+                        "3 marcadores adicionados com sucesso",
+                    );
+                    logToConsole(
+                        "🎉 Tudo pronto! O Google Maps está funcionando corretamente!",
+                        "success",
+                    );
+                } catch (error) {
+                    logToConsole(
+                        `❌ Erro ao inicializar mapa: ${error.message}`,
+                        "error",
+                    );
+                    updateStatus("init", "error", `Erro: ${error.message}`);
+                }
+            }
+
+            // Tornar initMap global para o callback
+            window.initMap = initMap;
+
+            // Carregar o Google Maps
+            updateStatus(
+                "api-key",
+                "success",
+                `API Key configurada: ${API_KEY.substring(0, 10)}...`,
+            );
+            loadGoogleMaps();
+        </script>
+    </body>
+</html>

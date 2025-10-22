@@ -31,20 +31,31 @@ const ProducerLogin = ({ onLogin, onBackToConsumer }: ProducerLoginProps) => {
         <div className="w-full max-w-md space-y-8 animate-scale-in">
           <div className="text-center space-y-4">
             <div className="relative inline-block">
-              <img src={logoProdutorArenaBRB} alt="Arena BRB" className="h-24 mx-auto hover-producer-glow transition-smooth" />
+              <img
+                src={logoProdutorArenaBRB}
+                alt="Arena BRB"
+                className="h-24 mx-auto hover-producer-glow transition-smooth"
+              />
             </div>
-            <h1 className="text-4xl font-bold text-producer-gold">Portal do Produtor</h1>
-            <p className="text-muted-foreground text-lg">Acesse sua conta profissional</p>
+            <h1 className="text-4xl font-bold text-producer-gold">
+              Portal do Produtor
+            </h1>
+            <p className="text-muted-foreground text-lg">
+              Acesse sua conta profissional
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="producer-email" className="text-sm font-semibold">Email</Label>
+              <Label htmlFor="producer-email" className="text-sm font-semibold">
+                Email
+              </Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-3 h-5 w-5 text-producer-gold/70" />
                 <Input
                   id="producer-email"
                   type="email"
+                  defaultValue="maria.produtora@eventos.com"
                   placeholder="produtor@email.com (opcional)"
                   className="pl-10 bg-producer-surface border-border transition-smooth focus:border-producer-gold focus:shadow-producer-glow"
                 />
@@ -52,7 +63,12 @@ const ProducerLogin = ({ onLogin, onBackToConsumer }: ProducerLoginProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="producer-password" className="text-sm font-semibold">Senha</Label>
+              <Label
+                htmlFor="producer-password"
+                className="text-sm font-semibold"
+              >
+                Senha
+              </Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-3 h-5 w-5 text-producer-gold/70" />
                 <Input
@@ -64,7 +80,11 @@ const ProducerLogin = ({ onLogin, onBackToConsumer }: ProducerLoginProps) => {
               </div>
             </div>
 
-            <Button type="submit" className="w-full gradient-producer-accent hover:shadow-producer-glow transition-smooth font-bold" size="lg">
+            <Button
+              type="submit"
+              className="w-full gradient-producer-accent hover:shadow-producer-glow transition-smooth font-bold"
+              size="lg"
+            >
               Entrar como Produtor
             </Button>
           </form>

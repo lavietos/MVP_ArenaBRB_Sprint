@@ -32,14 +32,65 @@ export const useGoogleMaps = (): UseGoogleMapsReturn => {
   const [isInitialized, setIsInitialized] = useState(false);
   const openInfoWindowRef = useRef<google.maps.InfoWindow | null>(null);
 
+  // Listener para erros globais do Google Maps
+  useEffect(() => {
+    const handleGoogleMapsError = (error: any) => {
+      console.error("❌ Erro global do Google Maps:", error);
+
+      if (error && error.error) {
+        const errorCode = error.error;
+        let errorMessage = "Erro ao carregar o Google Maps";
+
+        if (errorCode === "ApiNotActivatedMapError") {
+          errorMessage =
+            "⚠️ Maps JavaScript API não está ativada. Habilite em: https://console.cloud.google.com/apis/library/maps-backend.googleapis.com";
+        } else if (errorCode === "RefererNotAllowedMapError") {
+          errorMessage =
+            "⚠️ Domínio não autorizado. Configure HTTP referrers no Google Cloud Console ou remova as restrições para desenvolvimento.";
+        } else if (errorCode === "InvalidKeyMapError") {
+          errorMessage =
+            "⚠️ API Key inválida. Verifique a chave no arquivo .env";
+        } else if (errorCode === "RequestDeniedMapError") {
+          errorMessage =
+            "⚠️ Requisição negada. Verifique se as APIs estão habilitadas no Google Cloud Console.";
+        }
+
+        setError(errorMessage);
+      }
+    };
+
+    // Adicionar listener para erros do Google Maps
+    (window as any).gm_authFailure = handleGoogleMapsError;
+
+    return () => {
+      delete (window as any).gm_authFailure;
+    };
+  }, []);
+
   // Inicializar o mapa apenas uma vez
   useEffect(() => {
     if (isInitialized) return;
 
     const initMap = async () => {
       try {
+        console.log("🗺️ Iniciando carregamento do Google Maps...");
+        console.log(
+          "🔑 API Key:",
+          GOOGLE_MAPS_CONFIG.apiKey
+            ? `${GOOGLE_MAPS_CONFIG.apiKey.substring(0, 10)}...`
+            : "NÃO DEFINIDA",
+        );
+
+        // Verificar se a API Key existe
+        if (!GOOGLE_MAPS_CONFIG.apiKey || GOOGLE_MAPS_CONFIG.apiKey === "") {
+          throw new Error(
+            "API Key do Google Maps não está configurada. Verifique o arquivo .env",
+          );
+        }
+
         // Verificar se Google Maps já está carregado
         if (!window.google) {
+          console.log("📥 Carregando script do Google Maps...");
           // Carregar Google Maps se não estiver disponível
           const script = document.createElement("script");
           script.src = `https://maps.googleapis.com/maps/api/js?key=${
@@ -51,16 +102,42 @@ export const useGoogleMaps = (): UseGoogleMapsReturn => {
           script.defer = true;
 
           await new Promise((resolve, reject) => {
-            script.onload = resolve;
-            script.onerror = reject;
+            script.onload = () => {
+              console.log("✅ Script do Google Maps carregado com sucesso");
+              resolve(true);
+            };
+            script.onerror = (error) => {
+              console.error(
+                "❌ Erro ao carregar script do Google Maps:",
+                error,
+              );
+              reject(
+                new Error(
+                  "Falha ao carregar o script do Google Maps. Verifique sua conexão e API Key.",
+                ),
+              );
+            };
             document.head.appendChild(script);
           });
+        } else {
+          console.log("✅ Google Maps já estava carregado");
         }
 
         // Aguardar um pouco para garantir que o Google Maps está disponível
         await new Promise((resolve) => setTimeout(resolve, 500));
 
+        if (!window.google) {
+          throw new Error(
+            "Google Maps não está disponível após o carregamento",
+          );
+        }
+
+        if (!mapRef.current) {
+          throw new Error("Elemento do mapa (mapRef) não está disponível");
+        }
+
         if (mapRef.current && window.google) {
+          console.log("🗺️ Criando instância do mapa...");
           const mapInstance = new google.maps.Map(mapRef.current, {
             center: { lat: -15.783611, lng: -47.899167 }, // Centro na Arena BRB
             zoom: 16,
@@ -177,14 +254,45 @@ export const useGoogleMaps = (): UseGoogleMapsReturn => {
           setMap(mapInstance);
           setIsLoaded(true);
           setIsInitialized(true);
+          console.log("✅ Mapa inicializado com sucesso!");
         }
       } catch (err) {
-        console.error("Erro ao inicializar o mapa:", err);
-        setError(
-          `Erro ao carregar o Google Maps: ${
-            err instanceof Error ? err.message : "Erro desconhecido"
-          }`
+        console.error("❌ Erro ao inicializar o mapa:", err);
+
+        let errorMessage = "Erro desconhecido ao carregar o Google Maps";
+
+        if (err instanceof Error) {
+          errorMessage = err.message;
+
+          // Mensagens de erro específicas
+          if (err.message.includes("API Key")) {
+            errorMessage =
+              "⚠️ API Key não configurada. Verifique o arquivo .env e reinicie o servidor.";
+          } else if (err.message.includes("RefererNotAllowedMapError")) {
+            errorMessage =
+              "⚠️ Domínio não autorizado. Configure HTTP referrers no Google Cloud Console.";
+          } else if (err.message.includes("ApiNotActivatedMapError")) {
+            errorMessage =
+              "⚠️ Maps JavaScript API não está ativada. Habilite em: https://console.cloud.google.com/apis/library/maps-backend.googleapis.com";
+          } else if (err.message.includes("REQUEST_DENIED")) {
+            errorMessage =
+              "⚠️ Requisição negada. Verifique se as APIs estão habilitadas no Google Cloud Console.";
+          }
+        }
+
+        console.error("💡 Soluções possíveis:");
+        console.error(
+          "1. Verifique se o arquivo .env existe com VITE_GOOGLE_MAPS_API_KEY",
         );
+        console.error(
+          "2. Habilite Maps JavaScript API: https://console.cloud.google.com/apis/library/maps-backend.googleapis.com",
+        );
+        console.error(
+          "3. Habilite Places API: https://console.cloud.google.com/apis/library/places-backend.googleapis.com",
+        );
+        console.error("4. Reinicie o servidor com: npm run dev");
+
+        setError(errorMessage);
       }
     };
 
@@ -210,7 +318,7 @@ export const useGoogleMaps = (): UseGoogleMapsReturn => {
   // Função para buscar foto do local
   const getPlacePhoto = async (
     placeName: string,
-    position: { lat: number; lng: number }
+    position: { lat: number; lng: number },
   ) => {
     try {
       const service = new google.maps.places.PlacesService(map!);
@@ -220,14 +328,18 @@ export const useGoogleMaps = (): UseGoogleMapsReturn => {
         placeName,
         `${placeName} Brasília`,
         `${placeName} DF`,
+        `${placeName} SRPN`,
+        `Arena BRB ${placeName}`,
         placeName.replace(/[^\w\s]/g, ""), // Remover caracteres especiais
+        "Ginasio Nilson Nelson Brasilia", // Variação sem acentos
+        "Nilson Nelson Arena",
       ];
 
       for (const query of searchQueries) {
         const request = {
           query: query,
           location: new google.maps.LatLng(position.lat, position.lng),
-          radius: 2000, // Aumentar raio de busca
+          radius: 5000, // Aumentar raio de busca para 5km
           fields: ["photos", "name", "place_id", "formatted_address"],
         };
 
@@ -242,9 +354,14 @@ export const useGoogleMaps = (): UseGoogleMapsReturn => {
             ) {
               const photo = results[0].photos[0];
               const photoUrl = photo.getUrl({ maxWidth: 400, maxHeight: 300 });
-              console.log(`Foto encontrada para: ${query}`);
+              console.log(`✅ Foto encontrada para: ${query}`);
               resolve(photoUrl);
             } else {
+              if (
+                status !== google.maps.places.PlacesServiceStatus.ZERO_RESULTS
+              ) {
+                console.log(`⚠️ Status da busca para "${query}":`, status);
+              }
               resolve("");
             }
           });
@@ -255,10 +372,10 @@ export const useGoogleMaps = (): UseGoogleMapsReturn => {
         }
       }
 
-      console.log(`Nenhuma foto encontrada para: ${placeName}`);
+      console.log(`ℹ️ Nenhuma foto encontrada para: ${placeName}`);
       return "";
     } catch (error) {
-      console.error("Erro ao buscar foto:", error);
+      console.error("❌ Erro ao buscar foto:", error);
       return "";
     }
   };
@@ -266,7 +383,17 @@ export const useGoogleMaps = (): UseGoogleMapsReturn => {
   // Adicionar marcador
   const addMarker = useCallback(
     async (point: MapPoint) => {
-      if (!map) return;
+      if (!map) {
+        console.warn(
+          "⚠️ Mapa não está disponível para adicionar marcador:",
+          point.title,
+        );
+        return;
+      }
+
+      console.log(
+        `📍 Adicionando marcador: ${point.title} em (${point.position.lat}, ${point.position.lng})`,
+      );
 
       const marker = new google.maps.Marker({
         position: point.position,
@@ -351,7 +478,7 @@ export const useGoogleMaps = (): UseGoogleMapsReturn => {
       setMarkers((prev) => [...prev, marker]);
       setInfoWindows((prev) => [...prev, infoWindow]);
     },
-    [map]
+    [map],
   );
 
   // Remover marcador
@@ -410,7 +537,7 @@ export const useGoogleMaps = (): UseGoogleMapsReturn => {
         google.maps.event.removeListener(listener);
       });
     },
-    [map]
+    [map],
   );
 
   return {

@@ -1,0 +1,26 @@
+# Arquivos de backup
+*.backup
+*.bak
+.env.backup
+
+# Logs
+*.log
+
+# Arquivos temporários
+*.tmp
+*.temp
+~*
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos de configuração local/sensíveis
+.env.local
+*.key
+*.pem
+*.crt
+
+# Arquivos gerados durante testes
+test-*.sh
+debug-*.log
