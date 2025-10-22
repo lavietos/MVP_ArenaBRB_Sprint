@@ -3,6 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Mail, Lock } from "lucide-react";
 import logoConsumidorArenaBRB from "@/assets/logo_consumidor_ArenaBRB.svg";
+import { useEffect } from "react";
+import { preferences } from "./PreferencesQuestionnaire";
 
 interface ConsumerLoginProps {
   onLogin: () => void;
@@ -10,6 +12,27 @@ interface ConsumerLoginProps {
 }
 
 const ConsumerLogin = ({ onLogin, onSwitchToProducer }: ConsumerLoginProps) => {
+  // Prefetch emojis by rendering them invisibly
+  useEffect(() => {
+    const prefetchContainer = document.createElement('div');
+    prefetchContainer.style.position = 'absolute';
+    prefetchContainer.style.left = '-9999px';
+    prefetchContainer.style.fontSize = '60px';
+    prefetchContainer.setAttribute('aria-hidden', 'true');
+
+    preferences.forEach(pref => {
+      const span = document.createElement('span');
+      span.textContent = pref.emoji;
+      prefetchContainer.appendChild(span);
+    });
+
+    document.body.appendChild(prefetchContainer);
+
+    return () => {
+      document.body.removeChild(prefetchContainer);
+    };
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onLogin();
